@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+ name: logstash-dp
+ namespace: NAMEOUTPUT
+spec:
+ replicas: 1
+ template:
+  metadata:
+   labels:
+    app: logstash-dp
+  spec:
+   containers:
+   - name: logstash-dp
+     image: gcr.io/nh-v8-devops/logstash:latest
+     imagePullPolicy: Always
+     command: [ "/bin/bash", "-c", "--" ]
+     args: [ "while true; do sleep 30; done;" ]
+     command: [ "/bin/bash", "-c", "--" ]
+     args: [ "while true; do monit;sleep 10; done;" ]
+     ports:
+     - containerPort: 5043
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash-svc
+  namespace: NAMEOUTPUT
+  labels:
+    run: logstash-svc
+spec:
+  type: NodePort
+  ports:
+  - port: 5043
+    protocol: TCP
+  selector:
+    app: logstash-dp

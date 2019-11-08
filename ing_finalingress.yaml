@@ -1,0 +1,51 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nanoheal-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "route"
+    nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+    nginx.ingress.kubernetes.io/proxy-body-size: 300m
+spec:
+  tls:
+  - hosts:
+    - testing.nanoheal.com
+    secretName: nanoheal-ssl-secret-ca
+  - hosts:
+    - testingreport.nanoheal.com
+    secretName: nanoheal-ssl-secret-ca
+  - hosts:
+    - testingnode.nanoheal.com
+    secretName: nanoheal-ssl-secret-ca
+  - hosts:
+    - testinglicense.nanoheal.com
+    secretName: nanoheal-ssl-secret-ca
+  rules:
+  - host: testing.nanoheal.com
+    http:
+      paths:
+      - backend:
+          serviceName: dashboard-svc
+          servicePort: 80
+  - host: testingreport.nanoheal.com
+    http:
+      paths:
+      - backend:
+          serviceName: report-svc
+          servicePort: 80
+  - host: testingnode.nanoheal.com
+    http:
+      paths:
+      - backend:
+          serviceName: noderedis-svc
+          servicePort: 443
+  - host: testinglicense.nanoheal.com
+    http:
+      paths:
+      - backend:
+          serviceName: licensing-svc
+          servicePort: 80

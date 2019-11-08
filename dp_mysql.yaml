@@ -1,0 +1,49 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+ name: mysql-dp
+spec:
+ replicas: 1
+ template:
+  metadata:
+   labels:
+    app: mysql-dp
+  spec:
+   containers:
+   - name: mysql-dp
+     image: gcr.io/nh-v8-devops/mysql-v8:latest
+     imagePullPolicy: Always
+     command: [ "/bin/bash", "-c", "--" ]
+     args: [ "while true; do sleep 30; done;" ]
+     command: [ "/bin/bash", "-c", "--" ]
+     args: [ "while true; do monit;sleep 30; done;" ]
+     ports:
+     - containerPort: 3306
+     volumeMounts:
+       - name: mysql-data
+         mountPath: /var/lib/mysql
+       - name: mysql-backup
+         mountPath: /var/lib/mysql/backup
+   volumes:
+     - name: mysql-data
+       persistentVolumeClaim:
+          claimName: mysql-vl
+     - name: mysql-backup
+       persistentVolumeClaim:
+          claimName: mysql-vl-backup
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-svc
+  labels:
+    run: mysql-svc
+spec:
+  type: NodePort
+  ports:
+  - port: 3306
+    protocol: TCP
+  selector:
+    app: mysql-dp

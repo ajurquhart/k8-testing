@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+ name: elasticsearch-dp
+spec:
+ replicas: 1
+ template:
+  metadata:
+   labels:
+    app: elasticsearch-dp
+  spec:
+   containers:
+   - name: elasticsearch-dp
+     image: gcr.io/nh-v8-devops/elasticsearch:latest
+     imagePullPolicy: Always
+     command: [ "/bin/bash", "-c", "--" ]
+     args: [ "while true; do sleep 30; done;" ]
+     command: [ "/bin/bash", "-c", "--" ]
+     args: [ "while true; do monit;sleep 30; done;" ]
+     ports:
+     - containerPort: 9200
+     volumeMounts:
+       - name: elasticsearch-data
+         mountPath: /opt
+         subPath: elasticsearch
+   volumes:
+     - name: elasticsearch-data
+       persistentVolumeClaim:
+          claimName: elasticsearch
+   imagePullSecrets:
+   - name: nanohealsecret
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-svc
+  labels:
+    run: elasticsearch-svc
+spec:
+  type: NodePort
+  ports:
+  - port: 9200
+    protocol: TCP
+  selector:
+    app: elasticsearch-dp
